@@ -1,0 +1,123 @@
+<!-- src/main/resources/templates/email-template.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #000000; margin: 0; padding: 20px; }
+        .header { background-color: #000000; padding: 10px; text-align: center; margin-bottom: 20px; border-bottom: 4px solid #FDDA24; }
+        .tabla-elegante { border-collapse: collapse; font-size: 0.8em; width: 100%; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); margin-top: 20px; }
+        .tabla-elegante th { background-color: #9063CD; color: #FFFFFF; text-align: center; text-transform: uppercase; padding: 10px; }
+        .tabla-elegante td { padding: 8px 15px; text-align: left; border-bottom: 1px solid #dddddd; }
+        .tabla-elegante tbody tr:nth-of-type(even) { background-color: #f3f3f3; }
+        .footer { margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #FDDA24; }
+        .resumen { background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .alerta-vencido { background-color: #ffebee; }
+        .alerta-proximo { background-color: #fff3e0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img th:src="|data:image/png;base64,${logoBase64}|" alt="Logo Bancolombia" style="width: 200px;">
+    </div>
+    
+    <p>Buen día,</p>
+    <p>Con el objetivo de apoyar el cumplimiento de planes de acción, alertamos sobre los siguientes planes que requieren su atención.</p>
+
+    <!-- Resumen -->
+    <div class="resumen" th:if="${totalPlanes > 0}">
+        <h3>📊 Resumen de Notificación</h3>
+        <p><strong>Total de planes a revisar:</strong> <span th:text="${totalPlanes}">0</span></p>
+        <p><strong>Fecha de generación:</strong> <span th:text="${fechaGeneracion}">--</span></p>
+    </div>
+
+    <!-- Tabla de Planes Vencidos -->
+    <div th:if="${planesVencidos != null and !planesVencidos.isEmpty()}">
+        <h3 style="color: #d32f2f;">⚠️ Planes de Acción Vencidos (Urgente)</h3>
+        <table class="tabla-elegante">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Alerta</th>
+                    <th>Responsables</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="plan : ${planesVencidos}" class="alerta-vencido">
+                    <td th:text="${plan.titulo}">--</td>
+                    <td th:text="${plan.prioridad}">--</td>
+                    <td th:text="${plan.estadoPlan}">--</td>
+                    <td th:text="${plan.alerta}" style="font-weight: bold; color: #d32f2f;">--</td>
+                    <td th:text="${plan.responsables}">--</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tabla de Planes Próximos a Vencer -->
+    <div th:if="${planesProximos != null and !planesProximos.isEmpty()}">
+        <h3 style="color: #f57c00;">🔔 Planes de Acción Próximos a Vencer</h3>
+        <table class="tabla-elegante">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Alerta</th>
+                    <th>Responsables</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="plan : ${planesProximos}" class="alerta-proximo">
+                    <td th:text="${plan.titulo}">--</td>
+                    <td th:text="${plan.prioridad}">--</td>
+                    <td th:text="${plan.estadoPlan}">--</td>
+                    <td th:text="${plan.alerta}" style="font-weight: bold; color: #f57c00;">--</td>
+                    <td th:text="${plan.responsables}">--</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tabla de Planes Inconsistentes -->
+    <div th:if="${planesInconsistentes != null and !planesInconsistentes.isEmpty()}">
+        <h3 style="color: #7b1fa2;">🔍 Planes con Inconsistencias</h3>
+        <table class="tabla-elegante">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Observación</th>
+                    <th>Responsables</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="plan : ${planesInconsistentes}">
+                    <td th:text="${plan.titulo}">--</td>
+                    <td th:text="${plan.prioridad}">--</td>
+                    <td th:text="${plan.estadoPlan}">--</td>
+                    <td style="color: #7b1fa2; font-style: italic;">Requiere revisión</td>
+                    <td th:text="${plan.responsables}">--</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mensaje cuando no hay planes -->
+    <div th:if="${(planesVencidos == null or planesVencidos.isEmpty()) and (planesProximos == null or planesProximos.isEmpty()) and (planesInconsistentes == null or planesInconsistentes.isEmpty())}">
+        <div style="text-align: center; padding: 40px; background-color: #e8f5e8; border-radius: 10px;">
+            <h3 style="color: #2e7d32;">✅ ¡Excelente!</h3>
+            <p>No tiene planes de acción que requieran atención inmediata.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>¡Feliz día!</strong></p>
+        <p><i>📧 Nota: Correo enviado de forma automática por el Sistema de Notificaciones MRM.</i></p>
+        <p><i>🕒 Generado el <span th:text="${fechaGeneracion}">--</span></i></p>
+    </div>
+</body>
+</html>
