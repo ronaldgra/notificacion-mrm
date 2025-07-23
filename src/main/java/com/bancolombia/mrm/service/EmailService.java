@@ -3,6 +3,7 @@ package com.bancolombia.mrm.service;
 import com.bancolombia.mrm.exception.NotificacionException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private static final int MAX_REINTENTOS = 3;
     private static final long DELAY_REINTENTO = 2000; // 2 segundos
+    
+    @Value("${app.mail.from:ronaldgra@gmail.com}")
+    private String emailFrom;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -73,7 +77,7 @@ public class EmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setFrom("no-reply@bancolombia.com.co");
+        helper.setFrom(emailFrom);
         helper.setTo(para);
         helper.setSubject(asunto);
         helper.setText(contenidoHtml, true); // true indica que es HTML

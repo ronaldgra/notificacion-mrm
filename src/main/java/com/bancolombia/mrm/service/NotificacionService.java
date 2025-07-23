@@ -83,20 +83,28 @@ public class NotificacionService {
 
     private List<PlanAccion> obtenerPlanesActivos() {
         try {
-            return planAccionRepository.findByEstadoPlanAccNotInAndUsuarioActivoUpdatePlanAcc(
-                appConfig.getEstadosPlanExcluidos(), true);
+            List<String> estadosExcluidos = appConfig.getEstadosPlanExcluidos();
+            log.info("Buscando planes con estados NO incluidos en: {} y con usuario_activo_update_plan_acc = true", estadosExcluidos);
+            List<PlanAccion> planes = planAccionRepository.findByEstadoPlanAccNotInAndUsuarioActivoUpdatePlanAcc(
+                    estadosExcluidos, true);
+            log.info("El repositorio encontró {} planes que cumplen los criterios iniciales.", planes.size());
+            return planes;
         } catch (Exception e) {
-            log.error("Error al obtener planes activos: {}", e.getMessage());
+            log.error("Error al obtener planes activos: {}", e.getMessage(), e);
             throw new NotificacionException("Error al consultar planes de acción", e);
         }
     }
 
     private List<UsuarioPlan> obtenerUsuariosActivos() {
         try {
-            return usuarioPlanRepository.findByUsuarioActivoRelPlanAccAndTipoRelacionUsuarioIn(
-                true, appConfig.getRolesANotificar());
+            List<String> roles = appConfig.getRolesANotificar();
+            log.info("Buscando usuarios con roles en: {} y con usuario_activo_rel_plan_acc = true", roles);
+            List<UsuarioPlan> usuarios = usuarioPlanRepository.findByUsuarioActivoRelPlanAccAndTipoRelacionUsuarioIn(
+                true, roles);
+            log.info("El repositorio encontró {} usuarios que cumplen los criterios iniciales.", usuarios.size());
+            return usuarios;
         } catch (Exception e) {
-            log.error("Error al obtener usuarios activos: {}", e.getMessage());
+            log.error("Error al obtener usuarios activos: {}", e.getMessage(), e);
             throw new NotificacionException("Error al consultar usuarios", e);
         }
     }
